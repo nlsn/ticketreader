@@ -5,6 +5,7 @@ import android.util.Log;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +14,7 @@ public class Parser {
 
     private String pages;
     private String date;
+    private int remainingMins;
 
     public Parser(String data) {
         //if(data == null)
@@ -30,8 +32,21 @@ public class Parser {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
+        Date finalDate = addMinutesToDate(Long.parseLong(this.date, 16), date);
+
+        //calcola minuti rimanenti
+        Calendar c = Calendar.getInstance();
+        long diff = (c.getTime().getTime() - finalDate.getTime()) / 60000;
+        if(diff >= 90) {
+            remainingMins = 0;
+        } else {
+            remainingMins = (int)(90 - diff);
+        }
+
+
         return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-                .format(addMinutesToDate(Long.parseLong(this.date, 16), date));
+                .format(finalDate);
     }
 
 
@@ -46,6 +61,11 @@ public class Parser {
                                             & 0xFFFF;
             }
         return Integer.bitCount(tickets);
+    }
+
+
+    public int getRemainingMinutes() {
+        return remainingMins;
     }
 
 

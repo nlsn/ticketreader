@@ -130,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
                 Parser parser = new Parser(pages);
                 dataout.setText("Data obliterazione: " + parser.getDate()
                                 + System.getProperty("line.separator")
+                                + "Minuti rimanenti: " + parser.getRemainingMinutes()
+                                + System.getProperty("line.separator")
                                 + "Corse residue: " + parser.getRemainingRides());
             }
 		}
@@ -176,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_info) {
             alertDialog = showAlertDialog("Semplice applicazione opensource per visualizzare le " +
-                    "corse rimanenti nei biglietti GTT.");
+                    "corse rimanenti nei biglietti GTT. \nhttps://github.com/dslul/ticketreader");
             alertDialog.show();
 			return true;
         }
@@ -196,8 +198,9 @@ public class MainActivity extends AppCompatActivity {
 
 		alertDialog = new AlertDialog.Builder(this)
 				.setTitle("Informazioni")
-				//.setIcon(R.drawable.ic_launcher)
+				.setIcon(android.R.drawable.ic_dialog_info)
 				.setMessage(message)
+   				.setPositiveButton("Chiudi", null)
 				.create();
 
 		alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
