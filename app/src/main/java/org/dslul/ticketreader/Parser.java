@@ -45,7 +45,7 @@ public class Parser {
         }
 
 
-        return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+        return DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
                 .format(finalDate);
     }
 

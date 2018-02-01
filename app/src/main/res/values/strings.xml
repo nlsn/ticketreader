@@ -1,4 +1,14 @@
 <resources>
     <string name="app_name">GTT Ticket Reader</string>
     <string name="action_info">Info</string>
+    <string name="data_obliterazione">Data obliterazione:</string>
+    <string name="minuti_rimanenti">Minuti rimanenti:</string>
+    <string name="corse_rimaste">Corse rimaste:</string>
+    <string name="info_instructions">Avvicina un biglietto alla parte posteriore del dispositivo per effettuare la scansione</string>
+    <string name="immagine_biglietto_nfc">Immagine biglietto nfc</string>
+    <string name="read_another_ticket">Per leggere un altro biglietto, avvicinalo nuovamente al sensore NFC</string>
+    <string name="corse_disponibili">%d corse disponibili</string>
+    <string name="in_corso">In corso %d:%d</string>
+    <string name="corse_esaurite">Corse esaurite</string>
+    <string name="dettagli_biglietto">Dettagli biglietto</string>
 </resources>

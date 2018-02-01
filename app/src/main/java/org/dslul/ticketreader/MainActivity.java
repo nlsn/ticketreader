@@ -1,7 +1,9 @@
 package org.dslul.ticketreader;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -9,10 +11,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import android.content.ClipboardManager;
@@ -36,6 +42,9 @@ import android.app.AlertDialog;
 
 import android.content.DialogInterface;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -47,9 +56,22 @@ public class MainActivity extends AppCompatActivity {
 	private Intent intent;
 	private AlertDialog alertDialog;
 
+	private Toast currentToast;
+
 	private String pages = "ERROR";
 
-	private TextView dataout;
+    private AdView adview;
+    private ImageView imageNfc;
+    private CardView ticketCard;
+    private CardView statusCard;
+    private ImageView statusImg;
+    private TextView statoBiglietto;
+    private TextView infoLabel;
+	private TableLayout infoTable;
+	private TextView dataObliterazione;
+	private TextView corseRimanenti;
+
+	private CountDownTimer timer;
 
     private static final int ACTION_NONE  = 0;
 	private static final int ACTION_READ  = 1;
@@ -71,16 +93,30 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        adview = (AdView) findViewById(R.id.adView);
+        imageNfc = (ImageView) findViewById(R.id.imagenfcView);
+        ticketCard = (CardView) findViewById(R.id.ticketCardView);
+        statusCard = (CardView) findViewById(R.id.statusCardView);
+        statusImg = (ImageView) findViewById(R.id.statusImg);
+        statoBiglietto = (TextView) findViewById(R.id.stato_biglietto);
+        infoLabel = (TextView) findViewById(R.id.infolabel);
+        infoTable = (TableLayout) findViewById(R.id.info_table);
+        dataObliterazione = (TextView) findViewById(R.id.data_obliterazione);
+        corseRimanenti = (TextView) findViewById(R.id.corse_rimaste);
+
+        MobileAds.initialize(this, "");
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adview.loadAd(adRequest);
+
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		if (mNfcAdapter == null) {
-			// Stop here, we definitely need NFC
 			Toast.makeText(this, "Questo dispositivo non supporta la tecnologia NFC.", Toast.LENGTH_LONG).show();
 			finish();
 			return;
 		}
 
 		if (!mNfcAdapter.isEnabled()) {
-			Toast.makeText(this, "NFC disabilitato. Attiva l'NFC e torna indietro.", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "NFC disabilitato. Attiva l'NFC e premi il tasto indietro.", Toast.LENGTH_LONG).show();
 	        startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
 		}
 
@@ -92,7 +128,8 @@ public class MainActivity extends AppCompatActivity {
 
 		scanAction = ACTION_READ;
 
-        dataout = new TextView(this);
+        onNewIntent(getIntent());
+
     }
 
     @Override
@@ -111,43 +148,92 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        if (intent.getAction().equals(NfcAdapter.ACTION_TECH_DISCOVERED)) {
+		if (intent.getAction().equals(NfcAdapter.ACTION_TECH_DISCOVERED)) {
 
-            String mTextBufferText = "aa";
+			String mTextBufferText = "aa";
 
-            NfcThread nfcThread = new NfcThread(intent, scanAction, mTextBufferText, mTextBufferHandler, mToastShortHandler, mToastLongHandler, mShowInfoDialogHandler);
-            nfcThread.start();
+			NfcThread nfcThread = new NfcThread(intent, scanAction, mTextBufferText, mTextBufferHandler, mToastShortHandler, mToastLongHandler, mShowInfoDialogHandler);
+			nfcThread.start();
 
-            scanAction = ACTION_READ;
-        }
+			scanAction = ACTION_READ;
+		}
     }
 
 	private Handler mTextBufferHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			pages = (String)msg.obj;
+            if(timer != null)
+                timer.cancel();
             if(pages != "ERROR") {
-                dataout = (TextView) findViewById(R.id.outdata);
                 Parser parser = new Parser(pages);
-                dataout.setText("Data obliterazione: " + parser.getDate()
-                                + System.getProperty("line.separator")
-                                + "Minuti rimanenti: " + parser.getRemainingMinutes()
-                                + System.getProperty("line.separator")
-                                + "Corse residue: " + parser.getRemainingRides());
-            }
+				dataObliterazione.setText(parser.getDate());
+				corseRimanenti.setText(Integer.toString(parser.getRemainingRides()));
+
+                if(parser.getRemainingMinutes() != 0) {
+                    statoBiglietto.setText(R.string.in_corso);
+                    statusImg.setImageResource(R.drawable.ic_restore_grey_800_36dp);
+                    statusCard.setCardBackgroundColor(0xFF90CAF9);
+                    Calendar calendar = Calendar.getInstance();
+                    int sec = calendar.get(Calendar.SECOND);
+                    timer = new CountDownTimer((parser.getRemainingMinutes()*60 - sec)*1000, 1000) {
+
+                        public void onTick(long millis) {
+                            statoBiglietto.setText(String.format(getResources().getString(R.string.in_corso),
+                                    TimeUnit.MILLISECONDS.toMinutes(millis),
+                                    TimeUnit.MILLISECONDS.toSeconds(millis) -
+                                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))));
+                        }
+
+                        public void onFinish() {
+                            statoBiglietto.setText(R.string.corse_esaurite);
+                            statusImg.setImageResource(R.drawable.ic_error_grey_800_36dp);
+                            statusCard.setCardBackgroundColor(0xFFEF9A9A);
+                            timer.cancel();
+                        }
+
+                        }.start();
+                } else if(parser.getRemainingRides() == 0 && parser.getRemainingMinutes() == 0) {
+                    statoBiglietto.setText(R.string.corse_esaurite);
+                    statusImg.setImageResource(R.drawable.ic_error_grey_800_36dp);
+                    statusCard.setCardBackgroundColor(0xFFEF9A9A);
+                } else if(parser.getRemainingRides() != 0 && parser.getRemainingMinutes() == 0) {
+                    statoBiglietto.setText(String.format(getResources().getString(R.string.corse_disponibili), parser.getRemainingRides()));
+                    statusImg.setImageResource(R.drawable.ic_check_circle_grey_800_36dp);
+                    statusCard.setCardBackgroundColor(0xFFA5D6A7);
+                }
+
+                statusCard.setVisibility(View.VISIBLE);
+                ticketCard.setVisibility(View.VISIBLE);
+				infoLabel.setText(R.string.read_another_ticket);
+                imageNfc.setVisibility(View.GONE);
+
+
+            } else {
+                statusCard.setVisibility(View.GONE);
+                ticketCard.setVisibility(View.GONE);
+                infoLabel.setText(R.string.info_instructions);
+                imageNfc.setVisibility(View.VISIBLE);
+			}
 		}
 	};
 
 	private Handler mToastShortHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			String text = (String)msg.obj;
-			Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+            if(currentToast != null)
+			    currentToast.cancel();
+			currentToast = Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT);
+			currentToast.show();
 		}
 	};
 
 	private Handler mToastLongHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			String text = (String)msg.obj;
-			Toast.makeText(MainActivity.this, text, Toast.LENGTH_LONG).show();
+			if(currentToast != null)
+			    currentToast.cancel();
+			currentToast = Toast.makeText(MainActivity.this, text, Toast.LENGTH_LONG);
+			currentToast.show();
 		}
 	};
 
@@ -178,7 +264,9 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_info) {
             alertDialog = showAlertDialog("Semplice applicazione opensource per visualizzare le " +
-                    "corse rimanenti nei biglietti GTT. \nhttps://github.com/dslul/ticketreader");
+                    "corse rimanenti nei biglietti GTT. \n\nhttps://github.com/dslul/ticketreader\n\n" +
+					"Icone: Card Paypass by Viktor Vorobyev from the Noun Project;\n" +
+					"samsung galaxy by Setyo Ari Wibowo from the Noun Project");
             alertDialog.show();
 			return true;
         }
