@@ -104,19 +104,19 @@ public class MainActivity extends AppCompatActivity {
         dataObliterazione = (TextView) findViewById(R.id.data_obliterazione);
         corseRimanenti = (TextView) findViewById(R.id.corse_rimaste);
 
-        MobileAds.initialize(this, "");
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
         AdRequest adRequest = new AdRequest.Builder().build();
         adview.loadAd(adRequest);
 
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		if (mNfcAdapter == null) {
-			Toast.makeText(this, "Questo dispositivo non supporta la tecnologia NFC.", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.nfc_not_supported, Toast.LENGTH_LONG).show();
 			finish();
 			return;
 		}
 
 		if (!mNfcAdapter.isEnabled()) {
-			Toast.makeText(this, "NFC disabilitato. Attiva l'NFC e premi il tasto indietro.", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.nfc_disabled, Toast.LENGTH_LONG).show();
 	        startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
 		}
 
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
 			String mTextBufferText = "aa";
 
-			NfcThread nfcThread = new NfcThread(intent, scanAction, mTextBufferText, mTextBufferHandler, mToastShortHandler, mToastLongHandler, mShowInfoDialogHandler);
+			NfcThread nfcThread = new NfcThread(getBaseContext(), intent, scanAction, mTextBufferText, mTextBufferHandler, mToastShortHandler, mToastLongHandler, mShowInfoDialogHandler);
 			nfcThread.start();
 
 			scanAction = ACTION_READ;
@@ -188,7 +188,8 @@ public class MainActivity extends AppCompatActivity {
                             statoBiglietto.setText(R.string.corse_esaurite);
                             statusImg.setImageResource(R.drawable.ic_error_grey_800_36dp);
                             statusCard.setCardBackgroundColor(0xFFEF9A9A);
-                            timer.cancel();
+            				if(timer != null)
+                            	timer.cancel();
                         }
 
                         }.start();
@@ -263,10 +264,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_info) {
-            alertDialog = showAlertDialog("Semplice applicazione opensource per visualizzare le " +
-                    "corse rimanenti nei biglietti GTT. \n\nhttps://github.com/dslul/ticketreader\n\n" +
-					"Icone: Card Paypass by Viktor Vorobyev from the Noun Project;\n" +
-					"samsung galaxy by Setyo Ari Wibowo from the Noun Project");
+            alertDialog = showAlertDialog(getString(R.string.info_message));
             alertDialog.show();
 			return true;
         }
@@ -285,10 +283,10 @@ public class MainActivity extends AppCompatActivity {
 		};
 
 		alertDialog = new AlertDialog.Builder(this)
-				.setTitle("Informazioni")
+				.setTitle(R.string.information)
 				.setIcon(android.R.drawable.ic_dialog_info)
 				.setMessage(message)
-   				.setPositiveButton("Chiudi", null)
+   				.setPositiveButton(R.string.close_dialog, null)
 				.create();
 
 		alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {

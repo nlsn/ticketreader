@@ -2,6 +2,7 @@ package org.dslul.ticketreader;
 
 import java.io.IOException;
 
+import android.content.Context;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
@@ -17,7 +18,8 @@ public class NfcThread extends Thread {
 	private static final int ACTION_NONE  = 0;
 	private static final int ACTION_READ  = 1;
 	private static final int ACTION_WRITE = 2;
-	
+
+	private Context context;
 	private Intent intent;
 	private int scanAction;
 	private String mTextBufferText;
@@ -27,11 +29,13 @@ public class NfcThread extends Thread {
 	private byte[] toWriteBuffer = new byte[1024];
 	
 	NfcThread(
+			Context context,
 			Intent intent,
 			int scanAction,
 			String mTextBufferText,
 			Handler mTextBufferHandler, Handler mToastShortHandler, Handler mToastLongHandler, Handler mShowInfoDialogHandler
 			) {
+		this.context = context;
 		this.intent = intent;
 		this.scanAction = scanAction;
 		this.mTextBufferText = mTextBufferText;
@@ -52,14 +56,14 @@ public class NfcThread extends Thread {
 		final NfcA mfu = NfcA.get(tagFromIntent);
 		
 		if (mfu == null) {
-			showToastLong("Tag does not support ISO 14443-A!");
+            showToastLong(context.getString(R.string.ticket_not_supported));
 			return;
 		}
 		
 		byte[] ATQA = mfu.getAtqa();
 		
 		if (mfu.getSak() != 0x00 || ATQA.length != 2 || ATQA[0] != 0x44 || ATQA[1] != 0x00) {
-			showToastLong("Tag is not MIFARE Ultralight® - compatible!");
+			showToastLong(context.getString(R.string.ticket_not_supported));
 			return;
 		}
 		
@@ -80,16 +84,16 @@ public class NfcThread extends Thread {
 					content = content + ByteArrayToHexString(mfuPage) + System.getProperty("line.separator");
 				}
 				if(pagesRead >= 16) {
-					showToastShort("Biglietto letto correttamente.");
+					showToastShort(context.getString(R.string.ticket_correctly_read));
 					setTextBuffer(content);
 				} else {
-					showToastShort("Lettura fallita, riprovare");
+					showToastShort(context.getString(R.string.read_failure));
 					setTextBuffer("ERROR");
 				}
 			}
 		}
 		catch (Exception e) {
-			showToastLong("Errore di comunicazione. Riprova");
+			showToastLong(context.getString(R.string.communication_error));
 		}
 	}
 	

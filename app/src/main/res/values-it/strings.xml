@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GTT Ticket Reader</string>
+    <string name="app_name">Lettore Biglietti GTT</string>
     <string name="action_info">Info</string>
     <string name="data_obliterazione">Data obliterazione:</string>
     <string name="minuti_rimanenti">Minuti rimanenti:</string>
@@ -10,13 +11,13 @@
     <string name="corse_disponibili">%d corse disponibili</string>
     <string name="in_corso">In corso %d:%d</string>
     <string name="corse_esaurite">Corse esaurite</string>
-    <string name="dettagli_biglietto">Ticket info</string>
+    <string name="dettagli_biglietto">Dettagli biglietto</string>
     <string name="nfc_not_supported">Questo dispositivo non supporta la tecnologia NFC.</string>
     <string name="nfc_disabled">NFC disabilitato. Attiva l\'NFC e premi il tasto indietro.</string>
-    <string name="information">Information</string>
-    <string name="close_dialog">Close</string>
+    <string name="information">Informazioni</string>
+    <string name="close_dialog">Chiudi</string>
     <string name="info_message">Semplice applicazione opensource per visualizzare le corse rimanenti nei biglietti GTT.   https://github.com/dslul/ticketreader  Icone: Card Paypass by Viktor Vorobyev from the Noun Project; samsung galaxy by Setyo Ari Wibowo from the Noun Project</string>
-    <string name="ticket_not_supported">Invalid ticket!</string>
+    <string name="ticket_not_supported">Biglietto non valido!</string>
     <string name="ticket_correctly_read">Biglietto letto correttamente.</string>
     <string name="read_failure">Lettura fallita, riprovare</string>
     <string name="communication_error">Errore di comunicazione. Riprova</string>
