@@ -7,7 +7,7 @@
     <string name="info_instructions">Place a ticket near the back of the device to scan</string>
     <string name="immagine_biglietto_nfc">NFC ticket image</string>
     <string name="read_another_ticket">To read another ticket, move it close to the NFC sensor again</string>
-    <string name="corse_disponibili">%d rides available</string>
+    <string name="corse_disponibili">%d trips available</string>
     <string name="in_corso">In progress %d:%d</string>
     <string name="corse_esaurite">Trips exhausted</string>
     <string name="dettagli_biglietto">Ticket info</string>
