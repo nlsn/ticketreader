@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">GTT Ticket Reader</string>
     <string name="action_info">Info</string>
-    <string name="data_obliterazione">Data obliteration:</string> <!-- Not sure how to translate "obliterazione", could be confusing. -->
+    <string name="data_obliterazione">Time of validation:</string> <!-- Not sure how to translate "obliterazione" -->
     <string name="minuti_rimanenti">Minutes remaining:</string>
     <string name="corse_rimaste">Trips remaining:</string>
     <string name="info_instructions">Place a ticket near the back of the device to scan</string>
